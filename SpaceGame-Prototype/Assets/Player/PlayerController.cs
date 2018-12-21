@@ -19,7 +19,7 @@ public class PlayerController : NetworkBehaviour {
            // Create bullet in object-pool
            ServerBullet = (GameObject)Instantiate(
            BulletPrefab,
-           Vector3.zero,
+           new Vector3(1000, 1000, 0),
            new Quaternion());
         }
     }
@@ -47,7 +47,7 @@ public class PlayerController : NetworkBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Space))
         {         
-            CmdFire(BulletSpeed, BulletLifeTime, BulletSpawn.position, BulletSpawn.rotation);
+            CmdFirePool(BulletSpeed, BulletLifeTime, BulletSpawn.position, BulletSpawn.rotation);
         }
     }
 
@@ -81,4 +81,17 @@ public class PlayerController : NetworkBehaviour {
         // Destroy the bullet after 2 seconds
         Destroy(bullet, bulletLifeTime);
     }
+    [Command]
+    private void CmdFirePool(float bulletSpeed, float bulletLifeTime, Vector3 position, Quaternion rotation)
+    {
+        ServerBullet.transform.position = position;
+        ServerBullet.transform.rotation = rotation;
+
+        // Add the velocity to the bullet
+        ServerBullet.GetComponent<Rigidbody2D>().velocity = ServerBullet.transform.up * bulletSpeed;
+
+        // SPawn the bullet on the Clients
+        NetworkServer.Spawn(ServerBullet);
+    }
+
 }
